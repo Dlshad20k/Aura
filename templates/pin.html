@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset=UTF-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>AURA PLAY</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;900&display=swap" rel=stylesheet>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html,body{height:100%;font-family:Outfit,sans-serif;background:#0a0a0f;color:#f0f0f0;overflow:hidden;position:fixed;width:100%}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 30% 30%,rgba(29,185,84,.15),transparent 60%)}
+.w{position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:20px}
+.logo{font-size:30px;font-weight:900}.logo span{color:#1DB954}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px 24px;display:flex;flex-direction:column;align-items:center;gap:18px;width:100%;max-width:300px}
+h2{font-size:17px;font-weight:800}
+.dots{display:flex;gap:14px}
+.dot{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.2);transition:.2s}
+.dot.on{background:#1DB954;border-color:#1DB954;box-shadow:0 0 10px rgba(29,185,84,.5)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.k{height:54px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:#f0f0f0;font-family:Outfit;font-size:22px;font-weight:700;cursor:pointer;transition:.1s;user-select:none}
+.k:active{transform:scale(.93);background:rgba(29,185,84,.25)}
+.em{pointer-events:none;background:transparent!important;border-color:transparent!important}
+.enter{width:100%;height:52px;border-radius:14px;border:none;background:#1DB954;color:#000;font-family:Outfit;font-size:17px;font-weight:900;cursor:pointer;transition:.15s;user-select:none}
+.enter:disabled{background:#222;color:#555}
+</style></head>
+<body>
+<div class=w>
+  <div class=logo>AURA<span>PLAY</span></div>
+  <div class=card>
+    <h2>PIN eingeben</h2>
+    <div class=dots>
+      <div class=dot id=d0></div><div class=dot id=d1></div>
+      <div class=dot id=d2></div><div class=dot id=d3></div>
+    </div>
+    <div class=pad>
+      <button class=k onclick=p('1')>1</button>
+      <button class=k onclick=p('2')>2</button>
+      <button class=k onclick=p('3')>3</button>
+      <button class=k onclick=p('4')>4</button>
+      <button class=k onclick=p('5')>5</button>
+      <button class=k onclick=p('6')>6</button>
+      <button class=k onclick=p('7')>7</button>
+      <button class=k onclick=p('8')>8</button>
+      <button class=k onclick=p('9')>9</button>
+      <div class="k em"></div>
+      <button class=k onclick=p('0')>0</button>
+      <button class=k onclick=dl() style="font-size:18px;color:#aaa">⌫</button>
+    </div>
+    <form id=frm method=POST action=/pin>
+      <input type=hidden name=pin id=pinVal>
+      <button type=submit class=enter id=btn disabled>Weiter ➜</button>
+    </form>
+  </div>
+</div>
+<script>
+let pin='';
+function upd(){
+  for(let i=0;i<4;i++)document.getElementById('d'+i).className='dot'+(i<pin.length?' on':'');
+  document.getElementById('btn').disabled=pin.length<4;
+  document.getElementById('pinVal').value=pin;
+}
+function p(k){if(pin.length>=4)return;pin+=k;upd();}
+function dl(){pin=pin.slice(0,-1);upd();}
+document.addEventListener('keydown',e=>{
+  if(e.key>='0'&&e.key<='9')p(e.key);
+  else if(e.key==='Backspace')dl();
+  else if(e.key==='Enter'&&pin.length===4)document.getElementById('frm').submit();
+});
+</script>
+</body></html>

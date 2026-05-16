@@ -1,0 +1,36 @@
+{
+  "Dlo": {
+    "id": "Dlo",
+    "name": "Dlo"
+  },
+  "dlo": {
+    "id": "dlo",
+    "name": "Dlo",
+    "emoji": "🎧",
+    "color": "#1DB954"
+  },
+  "nazo": {
+    "id": "nazo",
+    "name": "Nazo",
+    "emoji": "🎵",
+    "color": "#E91E63"
+  },
+  "wooqq": {
+    "id": "wooqq",
+    "name": "Wooqq",
+    "emoji": "🔥",
+    "color": "#FF9800"
+  },
+  "shezo": {
+    "id": "shezo",
+    "name": "Shezo",
+    "emoji": "💫",
+    "color": "#9C27B0"
+  },
+  "alle": {
+    "id": "alle",
+    "name": "Alle",
+    "emoji": "🌍",
+    "color": "#00BCD4"
+  }
+}

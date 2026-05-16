@@ -1,0 +1,7 @@
+venv/
+music/
+__pycache__/
+*.pyc
+*.log
+tunnel_url.txt
+node_modules/

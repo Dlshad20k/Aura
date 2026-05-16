@@ -1,0 +1,12 @@
+[Unit]
+Description=MySpotify Clone Service
+After=network.target
+
+[Service]
+User=dlohoro
+WorkingDirectory=/home/dlohoro/spotify_clone
+ExecStart=/home/dlohoro/spotify_clone/venv/bin/python3 /home/dlohoro/spotify_clone/server.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
