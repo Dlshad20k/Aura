@@ -37,7 +37,7 @@ jobs:
       - name: Set WebView
         run: |
           mkdir -p www
-          echo '<meta http-equiv="refresh" content="0; url=https://YOUR-TUNNEL-URL">' > www/index.html
+          echo '<meta http-equiv="refresh" content="0; url=https://intersection-appeals-sponsorship-retirement.trycloudflare.com">' > www/index.html
 
       - name: Sync
         run: npx cap sync
