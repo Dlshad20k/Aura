@@ -15,20 +15,19 @@ TensorFlow.js), **kostenlos**, **ohne Anmeldung**, **ohne API-Key**, **ohne Serv
 Safari → Teilen-Symbol → **„Zum Home-Bildschirm"**. Dann startet sie wie eine
 echte App im Vollbild.
 
-## 🔧 GitHub Pages aktivieren (einmalig)
+## 🔧 GitHub Pages aktivieren (einmalig – 1 Klick)
 
-Die App wird automatisch veröffentlicht. Falls die URL noch nicht geht:
+GitHub erlaubt aus Sicherheitsgründen nicht, Pages automatisch per Skript zu
+aktivieren. Du musst es **einmal** selbst einschalten:
 
-**Variante A – automatisch (empfohlen):**
-Repo → **Settings → Pages → Build and deployment → Source: „GitHub Actions"**.
-Der Workflow `.github/workflows/pages.yml` veröffentlicht dann bei jedem Push.
+**Repo → Settings → Pages → „Build and deployment" → Source: „Deploy from a
+branch" → Branch: `main`, Ordner: `/docs` → Save.**
 
-**Variante B – ohne Actions:**
-Repo → **Settings → Pages → Source: „Deploy from a branch"** →
-Branch `claude/iphone-camera-recognition-6oj1qa`, Ordner **`/docs`** → Save.
+Nach ~1 Minute ist die App live unter:
+`https://dlshad20k.github.io/Aura/`
 
-Die URL lautet danach in etwa:
-`https://<dein-github-name>.github.io/aura/`
+Danach wird bei jedem Push auf `main` automatisch die neue Version ausgeliefert –
+kein weiterer Klick nötig.
 
 ## ℹ️ Wichtig zu „Claude / KI"
 
