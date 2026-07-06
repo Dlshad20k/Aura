@@ -37,10 +37,23 @@ im Chat auf claude.ai. Für KI in einer App bräuchte man einen kostenpflichtige
 (COCO-SSD / TensorFlow.js), die direkt im Browser deines iPhones läuft – dadurch
 ist alles **gratis und privat** (kein Bild verlässt dein Handy).
 
-## 🧠 Was wird erkannt?
-80 gängige Objektklassen (Handy, Laptop, Flasche, Auto, Stuhl, Obst, Tiere, u. v. m.)
-in Echtzeit. Für jedes Objekt gibt es einen Preis-Schätzwert und einen Link zu
-echten Live-Preisen.
+## 🧠 Zwei Modi
+
+**🎯 Fokus** – Die App zielt auf **eine Sache in der Bildmitte** (Fadenkreuz),
+stabilisiert sie über mehrere Frames (kein Flackern) und zeigt genau *dieses eine*
+Objekt mit Kategorie + Preis-Schätzung. Sie versucht zusätzlich, das Objekt genauer
+zu benennen (1000+ Kategorien).
+
+**🏷️ Barcode** – Halte einen **Produkt-Barcode** ins Fadenkreuz. Die App liest ihn
+(EAN/UPC/QR) und holt den **echten Markennamen** aus der freien Open-Food-Facts-
+Datenbank + einen Link zu **echten Live-Preisen**. Das ist der zuverlässigste
+kostenlose Weg zu echten Marken und Preisen.
+
+## ⚠️ Was kostenlos NICHT geht
+„Kamera auf irgendein Ding halten → Marke + exakter Preis erkennen" (wie Google Lens)
+braucht eine **kostenpflichtige Cloud-Vision-API**. Kostenlose On-Device-KI erkennt
+nur **Kategorien** (z. B. „Schuh", „Flasche"), keine Logos/Marken. Für echte Marken
++ Preise nutze den **Barcode-Modus**.
 
 ## 🛠 Technik
 - `docs/index.html` – Oberfläche
