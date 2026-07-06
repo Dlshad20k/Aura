@@ -1,5 +1,5 @@
 /* Aura Vision Service Worker – App-Shell offline verfügbar machen */
-const CACHE = 'aura-vision-v1';
+const CACHE = 'aura-vision-v2';
 const SHELL = ['./', './index.html', './app.js', './labels.js', './manifest.json'];
 
 self.addEventListener('install', e => {

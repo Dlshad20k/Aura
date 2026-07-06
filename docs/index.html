@@ -82,12 +82,37 @@
     background:rgba(40,10,20,.95);border:1px solid var(--danger);border-radius:16px;padding:20px;
     display:none;text-align:center;line-height:1.5}
   #err b{color:var(--danger)}
+
+  /* Fadenkreuz / Fokus-Zielbereich in der Bildmitte */
+  #reticle{position:absolute;z-index:4;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:56vw;max-width:320px;aspect-ratio:1/1;pointer-events:none;
+    border:2px solid rgba(255,255,255,.35);border-radius:22px;
+    box-shadow:0 0 0 100vmax rgba(0,0,0,.28);transition:border-color .2s}
+  #reticle.lock{border-color:var(--acc2)}
+  #reticle .corner{position:absolute;width:22px;height:22px;border:3px solid var(--acc2);opacity:.9}
+  #reticle .c1{top:-2px;left:-2px;border-right:none;border-bottom:none;border-radius:12px 0 0 0}
+  #reticle .c2{top:-2px;right:-2px;border-left:none;border-bottom:none;border-radius:0 12px 0 0}
+  #reticle .c3{bottom:-2px;left:-2px;border-right:none;border-top:none;border-radius:0 0 0 12px}
+  #reticle .c4{bottom:-2px;right:-2px;border-left:none;border-top:none;border-radius:0 0 12px 0}
+
+  /* Modus-Umschalter */
+  #modes{position:absolute;z-index:7;left:50%;transform:translateX(-50%);
+    bottom:calc(46vh + 16px);display:flex;gap:6px;background:rgba(18,18,30,.7);
+    backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:4px}
+  #modes button{pointer-events:auto;border:none;background:transparent;color:var(--dim);
+    font-weight:700;font-size:13px;padding:8px 16px;border-radius:999px;cursor:pointer}
+  #modes button.on{background:linear-gradient(90deg,var(--acc),#7a5bff);color:#fff}
 </style>
 </head>
 <body>
 <div id="app">
   <video id="video" playsinline muted autoplay></video>
   <canvas id="overlay"></canvas>
+
+  <div id="reticle">
+    <span class="corner c1"></span><span class="corner c2"></span>
+    <span class="corner c3"></span><span class="corner c4"></span>
+  </div>
 
   <div id="topbar">
     <div class="logo"><span id="dot" class="dot"></span> Aura Vision</div>
@@ -99,14 +124,19 @@
     <button class="fab" id="btnPause" title="Pause">⏸</button>
   </div>
 
+  <div id="modes">
+    <button id="modeObject" class="on">🎯 Fokus</button>
+    <button id="modeBarcode">🏷️ Barcode</button>
+  </div>
+
   <div id="sheet">
-    <h2>Erkannt · Live</h2>
-    <div id="results"><div id="empty">Richte die Kamera auf ein Objekt…</div></div>
+    <h2 id="sheetTitle">Fokus · zentriere ein Objekt</h2>
+    <div id="results"><div id="empty">Richte das Fadenkreuz auf eine Sache…</div></div>
   </div>
 
   <div id="start">
     <h1>Aura Vision</h1>
-    <p>Richte deine Kamera auf <b>alles</b> – die App erkennt Objekte live und zeigt dir sofort einen Preis. 100 % kostenlos, läuft direkt auf deinem iPhone, keine Anmeldung.</p>
+    <p>Zentriere <b>eine Sache</b> im Fadenkreuz – die App fokussiert genau darauf, erkennt sie und zeigt einen Preis. Für <b>echte Marken & Preise</b> nutze den <b>Barcode</b>-Modus. 100 % kostenlos, läuft direkt auf deinem iPhone.</p>
     <button class="btn" id="btnStart">📷 Kamera starten</button>
     <div class="hint">Beim ersten Start laden die KI-Modelle (~20&nbsp;MB, danach im Cache). Tippe auf „Erlauben", wenn Safari nach der Kamera fragt.</div>
   </div>
@@ -120,6 +150,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js"></script>
+<!-- Barcode-Scanner (funktioniert auch in iOS-Safari) -->
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
 <script src="labels.js"></script>
 <script src="app.js"></script>
 </body>
