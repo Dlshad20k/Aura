@@ -57,6 +57,8 @@
     border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px 14px;margin-bottom:10px;
     display:flex;align-items:center;gap:12px;animation:slideup .25s ease}
   @keyframes slideup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .card.net{border:1px solid rgba(0,230,168,.5);
+    background:linear-gradient(90deg,rgba(0,230,168,.14),var(--panel))}
   .card .emoji{font-size:30px;line-height:1}
   .card .info{flex:1;min-width:0}
   .card .name{font-weight:700;font-size:16px}
@@ -106,15 +108,18 @@
     <h1>Aura Vision</h1>
     <p>Richte deine Kamera auf <b>alles</b> – die App erkennt Objekte live und zeigt dir sofort einen Preis. 100 % kostenlos, läuft direkt auf deinem iPhone, keine Anmeldung.</p>
     <button class="btn" id="btnStart">📷 Kamera starten</button>
-    <div class="hint">Beim ersten Start lädt das KI-Modell (~5&nbsp;MB). Tippe auf „Erlauben", wenn Safari nach der Kamera fragt.</div>
+    <div class="hint">Beim ersten Start laden die KI-Modelle (~20&nbsp;MB, danach im Cache). Tippe auf „Erlauben", wenn Safari nach der Kamera fragt.</div>
   </div>
 
   <div id="err"></div>
 </div>
 
-<!-- On-device KI: TensorFlow.js + COCO-SSD (läuft komplett im Browser, kein Server, kein API-Key) -->
+<!-- On-device KI: TensorFlow.js läuft komplett im Browser, kein Server, kein API-Key.
+     COCO-SSD  = Objekt-Boxen (80 Klassen, Echtzeit)
+     MobileNet = Vollbild-Klassifikation (1000+ Kategorien, "alles auf der Welt") -->
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js"></script>
 <script src="labels.js"></script>
 <script src="app.js"></script>
 </body>
