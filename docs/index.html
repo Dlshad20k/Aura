@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="theme-color" content="#0a0a12" />
+<title>Aura Vision – Live Objekt- & Preis-Scanner</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<style>
+  :root{
+    --bg:#0a0a12; --panel:rgba(18,18,30,.72); --acc:#5b8cff; --acc2:#00e6a8;
+    --text:#f2f4ff; --dim:#9aa0b8; --danger:#ff5b7a;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+  #app{position:fixed;inset:0}
+  video,#overlay{position:absolute;inset:0;width:100%;height:100%}
+  video{object-fit:cover;background:#000}
+  #overlay{pointer-events:none}
+
+  /* Top bar */
+  #topbar{position:absolute;top:0;left:0;right:0;z-index:5;
+    padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;
+    display:flex;align-items:center;gap:10px;
+    background:linear-gradient(180deg,rgba(0,0,0,.55),transparent)}
+  #topbar .logo{font-weight:800;font-size:18px;letter-spacing:.3px;
+    display:flex;align-items:center;gap:8px}
+  #topbar .dot{width:9px;height:9px;border-radius:50%;background:#555;box-shadow:0 0 0 0 rgba(0,230,168,.6)}
+  #topbar .dot.live{background:var(--acc2);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,230,168,.55)}70%{box-shadow:0 0 0 12px rgba(0,230,168,0)}100%{box-shadow:0 0 0 0 rgba(0,230,168,0)}}
+  #status{margin-left:auto;font-size:12px;color:var(--dim);text-align:right;max-width:55%}
+
+  /* Start screen */
+  #start{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:28px;
+    background:radial-gradient(120% 90% at 50% 0%,#151533,#0a0a12 70%)}
+  #start h1{font-size:30px;margin:0 0 6px;background:linear-gradient(90deg,var(--acc),var(--acc2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  #start p{color:var(--dim);max-width:340px;line-height:1.5;margin:0 0 26px;font-size:15px}
+  .btn{border:none;border-radius:16px;padding:16px 30px;font-size:17px;font-weight:700;
+    color:#fff;background:linear-gradient(90deg,var(--acc),#7a5bff);cursor:pointer;
+    box-shadow:0 10px 30px rgba(91,140,255,.35)}
+  .btn:active{transform:scale(.97)}
+  .hint{margin-top:20px;font-size:12px;color:var(--dim);max-width:320px;line-height:1.5}
+
+  /* Bottom results sheet */
+  #sheet{position:absolute;left:0;right:0;bottom:0;z-index:6;
+    padding:14px 14px calc(env(safe-area-inset-bottom) + 14px);
+    background:linear-gradient(0deg,rgba(6,6,12,.92),rgba(6,6,12,.55) 70%,transparent);
+    max-height:46vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  #sheet h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin:0 0 10px 4px}
+  .card{background:var(--panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px 14px;margin-bottom:10px;
+    display:flex;align-items:center;gap:12px;animation:slideup .25s ease}
+  @keyframes slideup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .card .emoji{font-size:30px;line-height:1}
+  .card .info{flex:1;min-width:0}
+  .card .name{font-weight:700;font-size:16px}
+  .card .sub{font-size:12px;color:var(--dim);margin-top:2px}
+  .card .price{font-weight:800;font-size:16px;color:var(--acc2)}
+  .card .conf{display:inline-block;font-size:11px;color:var(--acc);
+    background:rgba(91,140,255,.15);padding:2px 7px;border-radius:20px;margin-left:6px}
+  .card a.shop{pointer-events:auto;text-decoration:none;font-size:12px;font-weight:700;
+    color:#fff;background:rgba(255,255,255,.12);padding:8px 12px;border-radius:12px;white-space:nowrap}
+  .card a.shop:active{background:rgba(255,255,255,.22)}
+  #empty{color:var(--dim);font-size:14px;text-align:center;padding:18px 0}
+
+  /* Controls */
+  #controls{position:absolute;right:14px;bottom:calc(46vh + 14px);z-index:7;
+    display:flex;flex-direction:column;gap:10px}
+  .fab{pointer-events:auto;width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.14);
+    background:rgba(18,18,30,.7);backdrop-filter:blur(10px);color:#fff;font-size:20px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .fab:active{transform:scale(.92)}
+  #err{position:absolute;z-index:30;left:16px;right:16px;top:50%;transform:translateY(-50%);
+    background:rgba(40,10,20,.95);border:1px solid var(--danger);border-radius:16px;padding:20px;
+    display:none;text-align:center;line-height:1.5}
+  #err b{color:var(--danger)}
+</style>
+</head>
+<body>
+<div id="app">
+  <video id="video" playsinline muted autoplay></video>
+  <canvas id="overlay"></canvas>
+
+  <div id="topbar">
+    <div class="logo"><span id="dot" class="dot"></span> Aura Vision</div>
+    <div id="status">Bereit</div>
+  </div>
+
+  <div id="controls">
+    <button class="fab" id="btnFlip" title="Kamera wechseln">🔄</button>
+    <button class="fab" id="btnPause" title="Pause">⏸</button>
+  </div>
+
+  <div id="sheet">
+    <h2>Erkannt · Live</h2>
+    <div id="results"><div id="empty">Richte die Kamera auf ein Objekt…</div></div>
+  </div>
+
+  <div id="start">
+    <h1>Aura Vision</h1>
+    <p>Richte deine Kamera auf <b>alles</b> – die App erkennt Objekte live und zeigt dir sofort einen Preis. 100 % kostenlos, läuft direkt auf deinem iPhone, keine Anmeldung.</p>
+    <button class="btn" id="btnStart">📷 Kamera starten</button>
+    <div class="hint">Beim ersten Start lädt das KI-Modell (~5&nbsp;MB). Tippe auf „Erlauben", wenn Safari nach der Kamera fragt.</div>
+  </div>
+
+  <div id="err"></div>
+</div>
+
+<!-- On-device KI: TensorFlow.js + COCO-SSD (läuft komplett im Browser, kein Server, kein API-Key) -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+<script src="labels.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
