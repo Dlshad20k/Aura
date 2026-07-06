@@ -15,12 +15,15 @@
   const btnFlip = document.getElementById('btnFlip');
   const btnPause= document.getElementById('btnPause');
 
-  let model = null;
+  let model = null;         // COCO-SSD (Objekt-Boxen)
+  let netModel = null;      // MobileNet (Vollbild, 1000+ Kategorien)
   let stream = null;
   let facing = 'environment';   // Rückkamera
   let running = false;
   let paused = false;
   let lastRender = 0;
+  let lastNet = 0;          // Throttle für MobileNet
+  let netResult = null;     // Letzte Vollbild-Klassifikation
   const COLORS = ['#5b8cff','#00e6a8','#ff5b7a','#ffd166','#c77dff','#4cc9f0','#f77f00'];
 
   const setStatus = (t) => statusEl.textContent = t;
@@ -55,11 +58,20 @@
 
   // --- Modell laden ---
   async function loadModel(){
-    setStatus('KI-Modell wird geladen…');
-    // 'lite_mobilenet_v2' = schnell, ideal fürs Handy
-    model = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
+    setStatus('KI-Modelle werden geladen…');
+    // Beide Modelle parallel laden. 'lite_mobilenet_v2' = schnell fürs Handy.
+    const [m, n] = await Promise.all([
+      cocoSsd.load({ base: 'lite_mobilenet_v2' }),
+      mobilenet.load({ version: 2, alpha: 1.0 })
+    ]);
+    model = m; netModel = n;
     setStatus('Live');
     dotEl.classList.add('live');
+  }
+
+  // Nimmt ein MobileNet-Label ("coffee mug, mug") und liefert das erste, saubere Wort
+  function cleanLabel(s){
+    return (s || '').split(',')[0].trim();
   }
 
   // --- Erkennungs-Schleife ---
@@ -69,6 +81,17 @@
       let predictions = [];
       try { predictions = await model.detect(video, 20, 0.5); }
       catch(e){ /* Frame überspringen */ }
+
+      // MobileNet ist schwerer -> nur ~alle 700ms auf dem Vollbild laufen lassen
+      const now = performance.now();
+      if (netModel && now - lastNet > 700){
+        lastNet = now;
+        try {
+          const cls = await netModel.classify(video, 2);
+          if (cls && cls.length) netResult = cls[0];
+        } catch(e){ /* Frame überspringen */ }
+      }
+
       draw(predictions);
       renderResults(predictions);
     }
@@ -105,42 +128,59 @@
     });
   }
 
+  function shopLink(q){
+    return q
+      ? `<a class="shop" target="_blank" rel="noopener"
+           href="https://www.google.com/search?tbm=shop&q=${encodeURIComponent(q)}">Live-Preise ›</a>`
+      : '';
+  }
+
+  function objectCard(p){
+    const info = window.AURA_DB[p.class] || {de:p.class, emoji:'🔎', price:null, q:p.class};
+    const conf = Math.round(p.score*100);
+    const priceHtml = info.price
+      ? `<span class="price">${info.price}</span> <span class="sub">ca.</span>`
+      : `<span class="sub">Preis per „Live-Preise"</span>`;
+    return `<div class="card">
+      <div class="emoji">${info.emoji}</div>
+      <div class="info">
+        <div class="name">${info.de}<span class="conf">${conf}%</span></div>
+        <div class="sub">${priceHtml}</div>
+      </div>
+      ${shopLink(info.q || info.de)}
+    </div>`;
+  }
+
+  // Highlight-Karte aus MobileNet (1000+ Kategorien, "alles auf der Welt")
+  function netCard(){
+    if (!netResult) return '';
+    const label = cleanLabel(netResult.className);
+    const conf = Math.round(netResult.probability*100);
+    if (conf < 12) return '';
+    return `<div class="card net">
+      <div class="emoji">🌍</div>
+      <div class="info">
+        <div class="name">${label}<span class="conf">${conf}%</span></div>
+        <div class="sub">Vollbild-Erkennung · <span class="sub">Preis per „Live-Preise"</span></div>
+      </div>
+      ${shopLink(label)}
+    </div>`;
+  }
+
   function renderResults(preds){
     const now = performance.now();
     if (now - lastRender < 350) return; // UI nicht zu oft neu bauen
     lastRender = now;
 
-    if (!preds.length){
-      resultsEl.innerHTML = '<div id="empty">Richte die Kamera auf ein Objekt…</div>';
-      return;
-    }
-    // Nach Klasse zusammenfassen, höchste Konfidenz behalten
+    // COCO-SSD Objekte nach Klasse zusammenfassen, höchste Konfidenz behalten
     const best = {};
     preds.forEach(p => {
       if (!best[p.class] || p.score > best[p.class].score) best[p.class] = p;
     });
     const items = Object.values(best).sort((a,b)=>b.score-a.score);
 
-    resultsEl.innerHTML = items.map(p => {
-      const info = window.AURA_DB[p.class] || {de:p.class, emoji:'🔎', price:null, q:p.class};
-      const conf = Math.round(p.score*100);
-      const priceHtml = info.price
-        ? `<span class="price">${info.price}</span> <span class="sub">ca.</span>`
-        : `<span class="sub">kein Preis</span>`;
-      const q = info.q || info.de;
-      const shop = q
-        ? `<a class="shop" target="_blank" rel="noopener"
-             href="https://www.google.com/search?tbm=shop&q=${encodeURIComponent(q)}">Live-Preise ›</a>`
-        : '';
-      return `<div class="card">
-        <div class="emoji">${info.emoji}</div>
-        <div class="info">
-          <div class="name">${info.de}<span class="conf">${conf}%</span></div>
-          <div class="sub">${priceHtml}</div>
-        </div>
-        ${shop}
-      </div>`;
-    }).join('');
+    const html = netCard() + items.map(objectCard).join('');
+    resultsEl.innerHTML = html || '<div id="empty">Richte die Kamera auf ein Objekt…</div>';
   }
 
   // --- Steuerung ---
